@@ -1,0 +1,11 @@
+<kmodule xmlns="http://www.drools.org/xsd/kmodule">
+    <kbase name="funcionarios-rules" packages="rules.funcionarios.coberturas">
+        <ksession name="funcionarios-rules" default="true"/>
+    </kbase>
+    <kbase name="socios-rules" packages="rules.socios.coberturas">
+        <ksession name="socios-rules"/>
+    </kbase>
+    <kbase name="vidas-limit-rules" packages="rules.limits">
+        <ksession name="vidas-limit-rules"/>
+    </kbase>
+</kmodule>

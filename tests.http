@@ -1,0 +1,64 @@
+### =====================================================================
+### Cálculo Reverso Globalvida — POST /rest/calculoGlobalvidaReverso
+###
+### Dado um premioDesejado, o gateway aciona o motor (/rest/calculoreverso)
+### e devolve as três opções fixas (opcao1/opcao2/opcao3) com seus capitais.
+### As coberturas saem com o CÓDIGO numérico (gateway converte sigla -> código).
+###   M=13281  IEA=13293  IPAVG=13289  GFI5000=16775
+### Local: porta 8084 (perfil application-local).
+### =====================================================================
+
+### Reverso — exemplo do contrato (contrato/request.json)
+POST http://localhost:8084/rest/calculoGlobalvidaReverso
+Content-Type: application/json
+
+{
+    "periodicidadePagamento": 1,
+    "dataCotacao": "21-05-2026",
+    "dataCriacaoCotacao": "21-05-2026",
+    "cnae": "47.11-3-01",
+    "carregamento": "617",
+    "numeroVidas": 5,
+    "premioDesejado": 70,
+    "assistencias": []
+}
+
+###
+
+### Reverso — reproduz o exemplo da especificação (vidas=5, premio=50)
+### Esperado (CNAE fator 0,95 / carregamento 1,53):
+###   opcao1 capital global = 176188.73 | individual = 35237.75 | GFI 25000 / 5000
+###   opcao2 capital global = 219811.44
+###   opcao3 capital global = 254528.44
+POST http://localhost:8084/rest/calculoGlobalvidaReverso
+Content-Type: application/json
+
+{
+    "periodicidadePagamento": 1,
+    "dataCotacao": "21-05-2026",
+    "dataCriacaoCotacao": "21-05-2026",
+    "cnae": "10.99-6-99",
+    "carregamento": "617",
+    "numeroVidas": 5,
+    "premioDesejado": 50
+}
+
+###
+
+### Reverso — ambiente DEV (via API Gateway, requer x-api-key)
+POST https://api-dev.segurosunimed.com.br/ti-susep/motor-globalvida-cotacao/rest/calculoGlobalvidaReverso
+Content-Type: application/json
+x-api-key: Ec58kwU4hG1xQ1NGkOU5g3d3ke0caGBv6Uq1UxD8
+
+{
+    "periodicidadePagamento": 1,
+    "dataCotacao": "21-05-2026",
+    "dataCriacaoCotacao": "21-05-2026",
+    "cnae": "47.11-3-01",
+    "carregamento": "617",
+    "numeroVidas": 5,
+    "premioDesejado": 70,
+    "assistencias": []
+}
+
+###

@@ -1,0 +1,367 @@
+package rules.funcionarios.coberturas;
+
+import drools.RetornoRegra;
+import contratos.globalvida.request.Cobertura;
+import contratos.globalvida.request.Assistencia;
+import contratos.globalvida.request.Funcionario;
+import contratos.globalvida.request.RequestGlobalvida;
+
+import java.util.List;
+
+global List<RetornoRegra> listaRetornoRegraFuncionario;
+
+// Rule: Restricted coverages cannot be contracted together
+rule "Coberturas Restritas Incompatíveis - Funcionarios"
+    when
+        $cotacao : RequestGlobalvida($funcionario : funcionarios, $funcionario.coberturas != null)
+        $count : Long(this > 1) from accumulate(
+            Cobertura(codigoCobertura in ("13284", "13286", "16775", "13292", "17738", "17739", "17740", "17741", "16772", "16773", "16788", "17742", "17743", "17744", "17745")) from $funcionario.getCoberturas(),
+            count()
+        )
+    then
+        RetornoRegra responseRegra = new RetornoRegra();
+        responseRegra.setCodigoRetorno(-1L);
+        responseRegra.setNomeAmigavel("Coberturas Restritas");
+        responseRegra.setDevolutiva("As coberturas de garantia funeral não podem ser contratadas juntas.");
+        listaRetornoRegraFuncionario.add(responseRegra);
+end
+
+// Rule: assistcorp doesn't contracted here
+rule "Assistcorp - Funcionarios"
+    when
+        $cotacao : RequestGlobalvida($funcionario : funcionarios, $funcionario.assistencias != null)
+        exists Assistencia(codigoAssistencia == "13305") from $funcionario.getAssistencias()
+    then
+        RetornoRegra responseRegra = new RetornoRegra();
+        responseRegra.setCodigoRetorno(-1L);
+        responseRegra.setNomeAmigavel("Assistcorp");
+        responseRegra.setDevolutiva("Assistência Corporate somente para Sócios/Diretores.");
+        listaRetornoRegraFuncionario.add(responseRegra);
+end
+
+// Rule: IEA (13293) requires M (13281) contracted
+rule "IEA requires M - Funcionarios"
+    when
+        $cotacao : RequestGlobalvida($funcionario : funcionarios, $funcionario.coberturas != null)
+        exists Cobertura(codigoCobertura == "13293") from $funcionario.getCoberturas()
+        not Cobertura(codigoCobertura == "13281") from $funcionario.getCoberturas()
+    then
+        RetornoRegra responseRegra = new RetornoRegra();
+        responseRegra.setCodigoRetorno(-1L);
+        responseRegra.setNomeAmigavel("IEA");
+        responseRegra.setDevolutiva("Cobertura IEA (13293) requer a contratação da cobertura M (13281).");
+        listaRetornoRegraFuncionario.add(responseRegra);
+end
+
+// Rule: IPA (13297) requires M (13281) or MA (13296) contracted
+rule "IPA requires M or MA - Funcionarios"
+    when
+        $cotacao : RequestGlobalvida($funcionario : funcionarios, $funcionario.coberturas != null)
+        exists Cobertura(codigoCobertura == "13297") from $funcionario.getCoberturas()
+        not Cobertura(codigoCobertura == "13281") from $funcionario.getCoberturas()
+        not Cobertura(codigoCobertura == "13296") from $funcionario.getCoberturas()
+    then
+        RetornoRegra responseRegra = new RetornoRegra();
+        responseRegra.setCodigoRetorno(-1L);
+        responseRegra.setNomeAmigavel("IPA");
+        responseRegra.setDevolutiva("Cobertura IPA (13297) requer a contratação da cobertura M (13281) ou MA (13296).");
+        listaRetornoRegraFuncionario.add(responseRegra);
+end
+
+// Rule: IFPD (13290) requires M (13281) contracted
+rule "IFPD requires M - Funcionarios"
+    when
+        $cotacao : RequestGlobalvida($funcionario : funcionarios, $funcionario.coberturas != null)
+        exists Cobertura(codigoCobertura == "13290") from $funcionario.getCoberturas()
+        not Cobertura(codigoCobertura == "13281") from $funcionario.getCoberturas()
+    then
+        RetornoRegra responseRegra = new RetornoRegra();
+        responseRegra.setCodigoRetorno(-1L);
+        responseRegra.setNomeAmigavel("IFPD");
+        responseRegra.setDevolutiva("Cobertura IFPD (13290) requer a contratação da cobertura M (13281).");
+        listaRetornoRegraFuncionario.add(responseRegra);
+end
+
+// Rule: MCONJ (13282) requires M (13281) contracted
+rule "MCONJ requires M - Funcionarios"
+    when
+        $cotacao : RequestGlobalvida($funcionario : funcionarios, $funcionario.coberturas != null)
+        exists Cobertura(codigoCobertura == "13282") from $funcionario.getCoberturas()
+        not Cobertura(codigoCobertura == "13281") from $funcionario.getCoberturas()
+    then
+        RetornoRegra responseRegra = new RetornoRegra();
+        responseRegra.setCodigoRetorno(-1L);
+        responseRegra.setNomeAmigavel("MCONJ");
+        responseRegra.setDevolutiva("Cobertura MCONJ (13282) requer a contratação da cobertura M (13281).");
+        listaRetornoRegraFuncionario.add(responseRegra);
+end
+
+// Rule: MF (13288) requires MCONJ (13282) contracted
+rule "MF requires MCONJ - Funcionarios"
+    when
+        $cotacao : RequestGlobalvida($funcionario : funcionarios, $funcionario.coberturas != null)
+        exists Cobertura(codigoCobertura == "13288") from $funcionario.getCoberturas()
+        not Cobertura(codigoCobertura == "13282") from $funcionario.getCoberturas()
+    then
+        RetornoRegra responseRegra = new RetornoRegra();
+        responseRegra.setCodigoRetorno(-1L);
+        responseRegra.setNomeAmigavel("MF");
+        responseRegra.setDevolutiva("Cobertura MF (13288) requer a contratação da cobertura MCONJ (13282).");
+        listaRetornoRegraFuncionario.add(responseRegra);
+end
+
+// Rule: MC (18730) requires M (13281) contracted
+rule "MC requires M - Funcionarios"
+    when
+        $cotacao : RequestGlobalvida($funcionario : funcionarios, $funcionario.coberturas != null)
+        exists Cobertura(codigoCobertura == "18730") from $funcionario.getCoberturas()
+        not Cobertura(codigoCobertura == "13281") from $funcionario.getCoberturas()
+    then
+        RetornoRegra responseRegra = new RetornoRegra();
+        responseRegra.setCodigoRetorno(-1L);
+        responseRegra.setNomeAmigavel("MC");
+        responseRegra.setDevolutiva("Cobertura MC (18730) requer a contratação da cobertura M (13281).");
+        listaRetornoRegraFuncionario.add(responseRegra);
+end
+
+// Rule: DC (13302) requires M (13281) contracted
+rule "DC requires M - Funcionarios"
+    when
+        $cotacao : RequestGlobalvida($funcionario : funcionarios, $funcionario.coberturas != null)
+        exists Cobertura(codigoCobertura == "13302") from $funcionario.getCoberturas()
+        not Cobertura(codigoCobertura == "13281") from $funcionario.getCoberturas()
+    then
+        RetornoRegra responseRegra = new RetornoRegra();
+        responseRegra.setCodigoRetorno(-1L);
+        responseRegra.setNomeAmigavel("DC");
+        responseRegra.setDevolutiva("Cobertura DC (13302) requer a contratação da cobertura M (13281).");
+        listaRetornoRegraFuncionario.add(responseRegra);
+end
+
+// Rule: AF (14556) requires M (13281) contracted
+rule "AF requires M - Funcionarios"
+    when
+        $cotacao : RequestGlobalvida($funcionario : funcionarios, $funcionario.coberturas != null)
+        exists Cobertura(codigoCobertura == "14556") from $funcionario.getCoberturas()
+        not Cobertura(codigoCobertura == "13281") from $funcionario.getCoberturas()
+    then
+        RetornoRegra responseRegra = new RetornoRegra();
+        responseRegra.setCodigoRetorno(-1L);
+        responseRegra.setNomeAmigavel("AF");
+        responseRegra.setDevolutiva("Cobertura AF (14556) requer a contratação da cobertura M (13281)");
+        listaRetornoRegraFuncionario.add(responseRegra);
+end
+
+// Rule: RC (18731) requires M (13281) contracted
+rule "RC requires M - Funcionarios"
+    when
+        $cotacao : RequestGlobalvida($funcionario : funcionarios, $funcionario.coberturas != null)
+        exists Cobertura(codigoCobertura == "18731") from $funcionario.getCoberturas()
+        not Cobertura(codigoCobertura == "13281") from $funcionario.getCoberturas()
+    then
+        RetornoRegra responseRegra = new RetornoRegra();
+        responseRegra.setCodigoRetorno(-1L);
+        responseRegra.setNomeAmigavel("RC");
+        responseRegra.setDevolutiva("Cobertura RC (18731) requer a contratação da cobertura M (13281).");
+        listaRetornoRegraFuncionario.add(responseRegra);
+end
+
+// Rule: MA (13296) requires M (13281) NOT contracted
+rule "MA requires M not contracted - Funcionarios"
+    when
+        $cotacao : RequestGlobalvida($funcionario : funcionarios, $funcionario.coberturas != null)
+        exists Cobertura(codigoCobertura == "13296") from $funcionario.getCoberturas()
+        exists Cobertura(codigoCobertura == "13281") from $funcionario.getCoberturas()
+    then
+        RetornoRegra responseRegra = new RetornoRegra();
+        responseRegra.setCodigoRetorno(-1L);
+        responseRegra.setNomeAmigavel("MA");
+        responseRegra.setDevolutiva("Cobertura MA (13296) requer que a cobertura M (13281) não seja contratada.");
+        listaRetornoRegraFuncionario.add(responseRegra);
+end
+
+// Rule: MACONJ (13298) requires MA (13296) contracted
+rule "MACONJ requires MA - Funcionarios"
+    when
+        $cotacao : RequestGlobalvida($funcionario : funcionarios, $funcionario.coberturas != null)
+        exists Cobertura(codigoCobertura == "13298") from $funcionario.getCoberturas()
+        not Cobertura(codigoCobertura == "13296") from $funcionario.getCoberturas()
+    then
+        RetornoRegra responseRegra = new RetornoRegra();
+        responseRegra.setCodigoRetorno(-1L);
+        responseRegra.setNomeAmigavel("MACONJ");
+        responseRegra.setDevolutiva("Cobertura MACONJ (13298) requer a contratação da cobertura MA (13296).");
+        listaRetornoRegraFuncionario.add(responseRegra);
+end
+
+// Rule: MAF (13299) requires MACONJ (13298) contracted
+rule "MAF requires MACONJ - Funcionarios"
+    when
+        $cotacao : RequestGlobalvida($funcionario : funcionarios, $funcionario.coberturas != null)
+        exists Cobertura(codigoCobertura == "13299") from $funcionario.getCoberturas()
+        not Cobertura(codigoCobertura == "13298") from $funcionario.getCoberturas()
+    then
+        RetornoRegra responseRegra = new RetornoRegra();
+        responseRegra.setCodigoRetorno(-1L);
+        responseRegra.setNomeAmigavel("MAF");
+        responseRegra.setDevolutiva("Cobertura MAF (13299) requer a contratação da cobertura MACONJ (13298).");
+        listaRetornoRegraFuncionario.add(responseRegra);
+end
+
+// Rule: MAC (18732) requires MA (13296) contracted
+rule "MAC requires MA - Funcionarios"
+    when
+        $cotacao : RequestGlobalvida($funcionario : funcionarios, $funcionario.coberturas != null)
+        exists Cobertura(codigoCobertura == "18732") from $funcionario.getCoberturas()
+        not Cobertura(codigoCobertura == "13296") from $funcionario.getCoberturas()
+    then
+        RetornoRegra responseRegra = new RetornoRegra();
+        responseRegra.setCodigoRetorno(-1L);
+        responseRegra.setNomeAmigavel("MAC");
+        responseRegra.setDevolutiva("Cobertura MAC (18732) requer a contratação da cobertura MA (13296).");
+        listaRetornoRegraFuncionario.add(responseRegra);
+end
+
+// Rule for GFI and GFF coverages
+rule "Garantia Funeral requires M or MA - Funcionarios"
+    when
+        $cotacao : RequestGlobalvida($funcionario : funcionarios, $funcionario.coberturas != null)
+        (exists Cobertura(codigoCobertura == "13284") from $funcionario.getCoberturas()
+        or exists Cobertura(codigoCobertura == "13286") from $funcionario.getCoberturas()
+        or exists Cobertura(codigoCobertura == "13292") from $funcionario.getCoberturas()
+        or exists Cobertura(codigoCobertura == "17738") from $funcionario.getCoberturas()
+        or exists Cobertura(codigoCobertura == "17739") from $funcionario.getCoberturas()
+        or exists Cobertura(codigoCobertura == "17740") from $funcionario.getCoberturas()
+        or exists Cobertura(codigoCobertura == "17741") from $funcionario.getCoberturas()
+        or exists Cobertura(codigoCobertura == "16772") from $funcionario.getCoberturas()
+        or exists Cobertura(codigoCobertura == "16773") from $funcionario.getCoberturas()
+        or exists Cobertura(codigoCobertura == "16788") from $funcionario.getCoberturas()
+        or exists Cobertura(codigoCobertura == "17742") from $funcionario.getCoberturas()
+        or exists Cobertura(codigoCobertura == "17743") from $funcionario.getCoberturas()
+        or exists Cobertura(codigoCobertura == "17744") from $funcionario.getCoberturas()
+        or exists Cobertura(codigoCobertura == "17745") from $funcionario.getCoberturas())
+        not Cobertura(codigoCobertura == "13281") from $funcionario.getCoberturas()
+        not Cobertura(codigoCobertura == "13296") from $funcionario.getCoberturas()
+    then
+        RetornoRegra responseRegra = new RetornoRegra();
+        responseRegra.setCodigoRetorno(-1L);
+        responseRegra.setNomeAmigavel("Garantia Funeral");
+        responseRegra.setDevolutiva("Coberturas Garantia Funeral requerem a contratação da cobertura M (13281) ou MA (13296).");
+        listaRetornoRegraFuncionario.add(responseRegra);
+end
+
+rule "Garantia Funeral incompatible with AF - Funcionarios"
+    when
+        $cotacao : RequestGlobalvida($funcionario : funcionarios, $funcionario.coberturas != null)
+        (exists Cobertura(codigoCobertura == "13284") from $funcionario.getCoberturas()
+        or exists Cobertura(codigoCobertura == "13286") from $funcionario.getCoberturas()
+        or exists Cobertura(codigoCobertura == "13292") from $funcionario.getCoberturas()
+        or exists Cobertura(codigoCobertura == "17738") from $funcionario.getCoberturas()
+        or exists Cobertura(codigoCobertura == "17739") from $funcionario.getCoberturas()
+        or exists Cobertura(codigoCobertura == "17740") from $funcionario.getCoberturas()
+        or exists Cobertura(codigoCobertura == "17741") from $funcionario.getCoberturas()
+        or exists Cobertura(codigoCobertura == "16772") from $funcionario.getCoberturas()
+        or exists Cobertura(codigoCobertura == "16773") from $funcionario.getCoberturas()
+        or exists Cobertura(codigoCobertura == "16788") from $funcionario.getCoberturas()
+        or exists Cobertura(codigoCobertura == "17742") from $funcionario.getCoberturas()
+        or exists Cobertura(codigoCobertura == "17743") from $funcionario.getCoberturas()
+        or exists Cobertura(codigoCobertura == "17744") from $funcionario.getCoberturas()
+        or exists Cobertura(codigoCobertura == "17745") from $funcionario.getCoberturas())
+        exists Cobertura(codigoCobertura == "13295") from $funcionario.getCoberturas()
+    then
+        RetornoRegra responseRegra = new RetornoRegra();
+        responseRegra.setCodigoRetorno(-1L);
+        responseRegra.setNomeAmigavel("Garantia Funeral");
+        responseRegra.setDevolutiva("Coberturas Garantia Funeral são incompatíveis com a cobertura AF (13295).");
+        listaRetornoRegraFuncionario.add(responseRegra);
+end
+
+// Rule: CB (13348) requires M (13281) or MA (13296) contracted
+rule "CB requires M or MA - Funcionarios"
+    when
+        $cotacao : RequestGlobalvida($funcionario : funcionarios, $funcionario.coberturas != null)
+        exists Cobertura(codigoCobertura == "13348") from $funcionario.getCoberturas()
+        not Cobertura(codigoCobertura == "13281") from $funcionario.getCoberturas()
+        not Cobertura(codigoCobertura == "13296") from $funcionario.getCoberturas()
+    then
+        RetornoRegra responseRegra = new RetornoRegra();
+        responseRegra.setCodigoRetorno(-1L);
+        responseRegra.setNomeAmigavel("CB");
+        responseRegra.setDevolutiva("Cobertura CB (13348) requer a contratação da cobertura M (13281) ou MA (13296).");
+        listaRetornoRegraFuncionario.add(responseRegra);
+end
+
+// Rule: Cesta Natalidade (13304) requires M (13281) or MA (13296) contracted
+rule "Cesta Natalidade requires M or MA - Funcionarios"
+    when
+        $cotacao : RequestGlobalvida($funcionario : funcionarios, $funcionario.assistencias != null, $funcionario.coberturas != null)
+        exists Assistencia(codigoAssistencia == "13304") from $funcionario.getAssistencias()
+        not Cobertura(codigoCobertura == "13281") from $funcionario.getCoberturas()
+        not Cobertura(codigoCobertura == "13296") from $funcionario.getCoberturas()
+    then
+        RetornoRegra responseRegra = new RetornoRegra();
+        responseRegra.setCodigoRetorno(-1L);
+        responseRegra.setNomeAmigavel("Cesta Natalidade");
+        responseRegra.setDevolutiva("A assistência Cesta Natalidade (13304) requer a contratação da cobertura M (13281) ou MA (13296).");
+        listaRetornoRegraFuncionario.add(responseRegra);
+end
+
+// Rule: Assessoria Profissional (16841) requires M (13281) or MA (13296) contracted
+rule "Assessoria Profissional requires M or MA - Funcionarios"
+    when
+        $cotacao : RequestGlobalvida($funcionario : funcionarios, $funcionario.assistencias != null, $funcionario.coberturas != null)
+        exists Assistencia(codigoAssistencia == "16841") from $funcionario.getAssistencias()
+        not Cobertura(codigoCobertura == "13281") from $funcionario.getCoberturas()
+        not Cobertura(codigoCobertura == "13296") from $funcionario.getCoberturas()
+    then
+        RetornoRegra responseRegra = new RetornoRegra();
+        responseRegra.setCodigoRetorno(-1L);
+        responseRegra.setNomeAmigavel("Assessoria Profissional");
+        responseRegra.setDevolutiva("A assistência Assessoria Profissional (16841) requer a contratação da cobertura M (13281) ou MA (13296).");
+        listaRetornoRegraFuncionario.add(responseRegra);
+end
+
+// Rule: 2ª Opinião Médica (16683) requires M (13281) or MA (13296) contracted
+rule "2a Opinião Médica requires M or MA - Funcionarios"
+    when
+        $cotacao : RequestGlobalvida($funcionario : funcionarios, $funcionario.assistencias != null, $funcionario.coberturas != null)
+        exists Assistencia(codigoAssistencia == "16683") from $funcionario.getAssistencias()
+        not Cobertura(codigoCobertura == "13281") from $funcionario.getCoberturas()
+        not Cobertura(codigoCobertura == "13296") from $funcionario.getCoberturas()
+    then
+        RetornoRegra responseRegra = new RetornoRegra();
+        responseRegra.setCodigoRetorno(-1L);
+        responseRegra.setNomeAmigavel("2ª Opinião Médica");
+        responseRegra.setDevolutiva("A assistência 2ª Opinião Médica (16683) requer a contratação da cobertura M (13281) ou MA (13296).");
+        listaRetornoRegraFuncionario.add(responseRegra);
+end
+
+// Rule: Assistência Pet (18442) requires M (13281) or MA (13296) contracted
+rule "Assistência Pet requires M or MA - Funcionarios"
+    when
+        $cotacao : RequestGlobalvida($funcionario : funcionarios, $funcionario.assistencias != null, $funcionario.coberturas != null)
+        exists Assistencia(codigoAssistencia == "18442") from $funcionario.getAssistencias()
+        not Cobertura(codigoCobertura == "13281") from $funcionario.getCoberturas()
+        not Cobertura(codigoCobertura == "13296") from $funcionario.getCoberturas()
+    then
+        RetornoRegra responseRegra = new RetornoRegra();
+        responseRegra.setCodigoRetorno(-1L);
+        responseRegra.setNomeAmigavel("Assistência Pet");
+        responseRegra.setDevolutiva("A assistência Assistência Pet (18442) requer a contratação da cobertura M (13281) ou MA (13296).");
+        listaRetornoRegraFuncionario.add(responseRegra);
+end
+
+// Rule: Orientação Financeira (16682) requires M (13281) or MA (13296) contracted
+rule "Orientação Financeira requires M or MA - Funcionarios"
+    when
+        $cotacao : RequestGlobalvida($funcionario : funcionarios, $funcionario.assistencias != null, $funcionario.coberturas != null)
+        exists Assistencia(codigoAssistencia == "16682") from $funcionario.getAssistencias()
+        not Cobertura(codigoCobertura == "13281") from $funcionario.getCoberturas()
+        not Cobertura(codigoCobertura == "13296") from $funcionario.getCoberturas()
+    then
+        RetornoRegra responseRegra = new RetornoRegra();
+        responseRegra.setCodigoRetorno(-1L);
+        responseRegra.setNomeAmigavel("Orientação Financeira");
+        responseRegra.setDevolutiva("A assistência Orientação Financeira (16682) requer a contratação da cobertura M (13281) ou MA (13296).");
+        listaRetornoRegraFuncionario.add(responseRegra);
+end

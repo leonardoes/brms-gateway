@@ -1,0 +1,50 @@
+package rules.limits;
+
+import drools.RetornoRegra;
+import contratos.globalvida.request.Funcionario;
+import contratos.globalvida.request.Socio;
+import contratos.globalvida.request.RequestGlobalvida;
+
+import java.util.List;
+
+global List<RetornoRegra> listaRetornoRegra;
+
+rule "Minimum vidas"
+    when
+        $cotacao : RequestGlobalvida($funcionarios : funcionarios, $socios : socios)
+        $totalVidasFuncionarios : Integer() from accumulate(
+            Funcionario($vidas : numeroVidas) from $funcionarios,
+            sum($vidas)
+        )
+        $totalVidasSocios : Integer() from accumulate(
+            Socio($vidas : numeroVidas) from $socios,
+            sum($vidas)
+        )
+        eval($totalVidasFuncionarios + $totalVidasSocios < 2)
+    then
+        RetornoRegra responseRegra = new RetornoRegra();
+        responseRegra.setCodigoRetorno(-1L);
+        responseRegra.setNomeAmigavel("Mínimo vidas");
+        responseRegra.setDevolutiva("A cotação requer no mínimo duas (2) vidas.");
+        listaRetornoRegra.add(responseRegra);
+end
+
+rule "Maximum vidas"
+    when
+        $cotacao : RequestGlobalvida($funcionarios : funcionarios, $socios : socios)
+        $totalVidasFuncionarios : Integer() from accumulate(
+            Funcionario($vidas : numeroVidas) from $funcionarios,
+            sum($vidas)
+        )
+        $totalVidasSocios : Integer() from accumulate(
+            Socio($vidas : numeroVidas) from $socios,
+            sum($vidas)
+        )
+        eval($totalVidasFuncionarios + $totalVidasSocios > 499)
+    then
+        RetornoRegra responseRegra = new RetornoRegra();
+        responseRegra.setCodigoRetorno(-1L);
+        responseRegra.setNomeAmigavel("Máximo vidas");
+        responseRegra.setDevolutiva("A cotação só pode ser realizada com no máximo 499 vidas.");
+        listaRetornoRegra.add(responseRegra);
+end
