@@ -101,23 +101,6 @@
             <artifactId>kie-spring</artifactId>
             <version>${drools.version}</version>
         </dependency>
-
-        <!-- Manage AWS resources -->
-        <dependency>
-            <groupId>io.awspring.cloud</groupId>
-            <artifactId>spring-cloud-aws-starter-secrets-manager</artifactId>
-        </dependency>
-
-        <!-- Database config -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-        </dependency>
     </dependencies>
 
     <dependencyManagement>
