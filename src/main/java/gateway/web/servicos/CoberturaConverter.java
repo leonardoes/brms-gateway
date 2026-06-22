@@ -11,6 +11,8 @@ import contratos.globalvida.response.ResponseFuncionario;
 import contratos.globalvida.response.ResponseCobertura;
 import contratos.globalvida.response.ResponseAssistencia;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
@@ -181,8 +183,11 @@ public class CoberturaConverter {
      *
      * O motor entrega tipo complexo (passthrough), com a estrutura:
      *   { ..., funcionarios: { numeroVidas, opcao1|opcao2|opcao3: { coberturas: [ { codigoCobertura, ... } ] } } }
-     * Apenas o campo codigoCobertura de cada cobertura é remapeado (sigla -> código),
-     * reaproveitando o mesmo dicionário SIGLA_PARA_CODIGO do fluxo forward.
+     * Para cada cobertura:
+     *   - codigoCobertura é remapeado (sigla -> código), reaproveitando o dicionário
+     *     SIGLA_PARA_CODIGO do fluxo forward;
+     *   - capitalCobertura/capitalIndividual são normalizados para BigDecimal (escala 2),
+     *     evitando notação científica que o Double produz para valores grandes (>= 1e7).
      */
     @SuppressWarnings("unchecked")
     public static Object converterResponseReverso(Object motorResponse) {
@@ -202,10 +207,23 @@ public class CoberturaConverter {
                 if (codigo instanceof String) {
                     cobertura.put("codigoCobertura", converterParaCodigo((String) codigo));
                 }
+                normalizarValorMonetario(cobertura, "capitalCobertura");
+                normalizarValorMonetario(cobertura, "capitalIndividual");
             });
         });
 
         return motorResponse;
+    }
+
+    /**
+     * Converte um campo numérico da cobertura para BigDecimal com escala 2 (HALF_UP),
+     * garantindo serialização em notação decimal plana (sem notação científica).
+     */
+    private static void normalizarValorMonetario(Map<String, Object> cobertura, String campo) {
+        Object valor = cobertura.get(campo);
+        if (valor instanceof Number) {
+            cobertura.put(campo, BigDecimal.valueOf(((Number) valor).doubleValue()).setScale(2, RoundingMode.HALF_UP));
+        }
     }
 
     private static String converterParaSigla(String codigo) {
