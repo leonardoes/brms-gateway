@@ -25,4 +25,9 @@ public class MotorRequestGlobalvidaReverso {
     private String carregamento;
     private String dataCotacao;
     private String dataCriacaoCotacao;
+
+    // Calculado e preenchido exclusivamente pelo gateway (lista cnaesRecusados.csv);
+    // o motor apenas consome para aplicar a crítica de CNAE recusado.
+    // String ("true"/"false") porque a ferramenta low-code não tem tipo booleano.
+    private String cnaeRecusado;
 }

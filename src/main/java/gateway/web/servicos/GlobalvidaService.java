@@ -101,6 +101,8 @@ public class GlobalvidaService {
         variaveis.setPremioDesejado(requestReverso.getPremioDesejado());
         variaveis.setCnae(requestReverso.getCnae());
         variaveis.setCarregamento(requestReverso.getCarregamento());
+        // Único dado de regra que vive no gateway; sempre definido aqui (cliente não envia)
+        variaveis.setCnaeRecusado(String.valueOf(CnaeRecusadoLoader.isCnaeRecusado(requestReverso.getCnae())));
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
         if (requestReverso.getDataCotacao() != null) {
